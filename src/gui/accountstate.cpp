@@ -82,7 +82,7 @@ AccountState::AccountState(AccountPtr account)
     , _state(AccountState::Disconnected)
     , _connectionStatus(ConnectionValidator::Undefined)
     , _waitingForNewCredentials(false)
-    , _maintenanceToConnectedDelay(60000 + (qrand() % (4 * 60000))) // 1-5min delay
+    , _maintenanceToConnectedDelay(1min + std::chrono::minutes(qrand() % (4min).count())) // 1-5min delay
 {
     qRegisterMetaType<AccountState *>("AccountState*");
 
@@ -326,11 +326,11 @@ void AccountState::slotConnectionValidatorResult(ConnectionValidator::Status sta
                || _connectionStatus == ConnectionValidator::MaintenanceMode)) {
         if (!_timeSinceMaintenanceOver.isValid()) {
             qCInfo(lcAccountState) << "AccountState reconnection: delaying for"
-                                   << _maintenanceToConnectedDelay << "ms";
+                                   << _maintenanceToConnectedDelay.count() << "ms";
             _timeSinceMaintenanceOver.start();
-            QTimer::singleShot(_maintenanceToConnectedDelay + 100, this, [this] { AccountState::checkConnectivity(false); });
+            QTimer::singleShot(_maintenanceToConnectedDelay, this, [this] { AccountState::checkConnectivity(false); });
             return;
-        } else if (_timeSinceMaintenanceOver.elapsed() < _maintenanceToConnectedDelay) {
+        } else if (_timeSinceMaintenanceOver.elapsed() < _maintenanceToConnectedDelay.count()) {
             qCInfo(lcAccountState) << "AccountState reconnection: only"
                                    << _timeSinceMaintenanceOver.elapsed() << "ms have passed";
             return;
