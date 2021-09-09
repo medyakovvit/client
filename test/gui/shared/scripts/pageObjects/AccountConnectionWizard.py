@@ -31,6 +31,10 @@ class AccountConnectionWizard:
         "visible": 1,
         "window": names.owncloudWizard_OCC_OwncloudWizard,
     }
+    CHOOSE_WHAT_TO_SYNC_BUTTON = names.bSelectiveSync_QPushButton
+    CHOOSE_WHAT_TO_SYNC_CHECKBOX = names.choose_What_To_Synchronize_QTreeWidget
+    CHOOSE_WHAT_TO_SYNC_OK_BUTTON = names.choose_What_To_Sync_OK_QPushButton
+    MANUAL_SYNC_FOLDER = names.owncloudWizard_rManualFolder_QRadioButton
 
     def __init__(self):
         pass
@@ -69,4 +73,12 @@ class AccountConnectionWizard:
             str(squish.waitForObjectExists(self.SELECT_LOCAL_FOLDER).text),
             self.sanitizeFolderPath(clientDetails['localfolder']),
         )
+
+    def connectAccount(self):
         squish.clickButton(squish.waitForObject(self.FINISH_BUTTON))
+
+    def openSyncDialog(self):
+        squish.clickButton(squish.waitForObject(self.CHOOSE_WHAT_TO_SYNC_BUTTON))
+
+    def selectManualSyncFolder(self):
+        squish.clickButton(squish.waitForObject(self.MANUAL_SYNC_FOLDER))
