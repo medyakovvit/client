@@ -61,7 +61,7 @@ Feature: Sharing
         And user "Brian" has been created on the server with default attributes and without skeleton files
         And user "Alice" has shared folder "simple-folder" on the server with user "Brian" with "all" permissions
         And user "Brian" has set up a client with default settings
-       When the user overwrites the file "simple-folder/textfile.txt" with content "overwrite ownCloud test text file"
+        When the user overwrites the file "simple-folder/textfile.txt" with content "overwrite ownCloud test text file"
         Then as "Brian" the file "simple-folder/textfile.txt" on the server should have the content "overwrite ownCloud test text file"
         And as "Alice" the file "simple-folder/textfile.txt" on the server should have the content "overwrite ownCloud test text file"
 
@@ -96,7 +96,7 @@ Feature: Sharing
         Given user "Alice" has uploaded file with content "ownCloud test text file 0" to "/textfile0.txt" on the server
         And user "Alice" has set up a client with default settings
         When the user creates a new public link for file "%client_sync_path_user1%/textfile0.txt" without password using the client-UI
-        Then as user "Alice" the file "textfile0.txt" should have a public link on the server
+        Then user "Alice" should have some public shares on the server
         And the public should be able to download the file "textfile0.txt" without password from the last created public link by "Alice" on the server
 
 
@@ -104,7 +104,7 @@ Feature: Sharing
         Given user "Alice" has set up a client with default settings
         And user "Alice" has uploaded file with content "ownCloud test text file 0" to "/textfile0.txt" on the server
         When the user creates a new public link for file "%client_sync_path_user1%/textfile0.txt" with password "pass123" using the client-UI
-        Then as user "Alice" the file "textfile0.txt" should have a public link on the server
+        Then user "Alice" should have some public shares on the server
         And the public should be able to download the file "textfile0.txt" with password "pass123" from the last created public link by "Alice" on the server
 
     @issue-8733
@@ -126,7 +126,7 @@ Feature: Sharing
         Given user "Alice" has created folder "simple-folder" on the server
         And user "Alice" has set up a client with default settings
         When the user creates a new public link with permissions "Download / View" for folder "%client_sync_path_user1%/simple-folder" without password using the client-UI
-        Then as user "Alice" the folder "simple-folder" should have a public link on the server
+        Then user "Alice" should have some public shares on the server
         And the public should be able to download the folder "lorem.txt" without password from the last created public link by "Alice" on the server
 
 
@@ -134,7 +134,7 @@ Feature: Sharing
         Given user "Alice" has created folder "simple-folder" on the server
         And user "Alice" has set up a client with default settings
         When the user creates a new public link with permissions "Download / View" for folder "%client_sync_path_user1%/simple-folder" with password "pass123" using the client-UI
-        Then as user "Alice" the folder "simple-folder" should have a public link on the server
+        Then user "Alice" should have some public shares on the server
         And the public should be able to download the folder "lorem.txt" with password "pass123" from the last created public link by "Alice" on the server
 
     @issue-8733
