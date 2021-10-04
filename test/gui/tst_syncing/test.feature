@@ -1,4 +1,3 @@
-@sync
 Feature: Syncing files
 
     As a user
@@ -56,11 +55,11 @@ Feature: Syncing files
         Given user "Alice" has created folder "simple-folder" on the server
         And user "Alice" has created folder "large-folder" on the server
         And the user has started the client
-        And the user has added the following server address:
-            | server | %local_server% |
-        And the user has added the following account credentials:
-            | user     | Alice |
-            | password | 1234  |
+        And the user has added the following account information:
+            | server      | %local_server%           |
+            | user        | Alice                    |
+            | password    | 1234                     |
+            | localfolder | %client_sync_path_user1% |
         When the user opens chose_what_to_sync dialog
         Then the dialog chose_what_to_sync should be visible
         And the sync all checkbox should be checked
@@ -81,12 +80,10 @@ Feature: Syncing files
         Given user "Alice" has created folder "simple-folder" on the server
         And user "Alice" has created folder "large-folder" on the server
         And the user has started the client
-        And the user has added the following server address:
-            | server | %local_server% |
-        And the user has added the following account credentials:
-            | user     | Alice |
-            | password | 1234  |
-        And the user has changed the sync directory
+        And the user has added the following account information:
+            | server      | %local_server%           |
+            | user        | Alice                    |
+            | password    | 1234                     |
             | localfolder | %client_sync_path_user1% |
         When the user selects the following folders to sync:
             | folder        |
@@ -102,15 +99,13 @@ Feature: Syncing files
         And user "Alice" has created folder "large-folder" on the server
         And user "Alice" has uploaded file on the server with content "test content" to "lorem.txt"
         And the user has started the client
-        And the user has added the following server address:
-            | server | %local_server% |
-        And the user has added the following account credentials:
-            | user     | Alice |
-            | password | 1234  |
-        And the user has changed the sync directory
+        And the user has added the following account information:
+            | server      | %local_server%           |
+            | user        | Alice                    |
+            | password    | 1234                     |
             | localfolder | %client_sync_path_user1% |
         When the user selects manual sync folder option
-        When the user connects the account
+        And the user connects the account
         Then the folder "simple-folder" should not exist on the file system
         But the folder "large-folder" should not exist on the file system
         And the file "lorem.txt" should not exist on the file system
@@ -123,12 +118,10 @@ Feature: Syncing files
         And user "Alice" has uploaded file on the server with content "more contents" to "aFolder/lorem.txt"
         And user "Alice" has created folder "bFolder" on the server
         And the user has started the client
-        And the user has added the following server address:
-            | server | %local_server% |
-        And the user has added the following account credentials:
-            | user     | Alice |
-            | password | 1234  |
-        And the user has changed the sync directory
+        And the user has added the following account information:
+            | server      | %local_server%           |
+            | user        | Alice                    |
+            | password    | 1234                     |
             | localfolder | %client_sync_path_user1% |
         When the user opens chose_what_to_sync dialog
         # folders are sorted by name in ascending order by default

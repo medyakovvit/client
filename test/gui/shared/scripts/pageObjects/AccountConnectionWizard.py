@@ -31,10 +31,27 @@ class AccountConnectionWizard:
         "visible": 1,
         "window": names.owncloudWizard_OCC_OwncloudWizard,
     }
-    CHOOSE_WHAT_TO_SYNC_BUTTON = names.bSelectiveSync_QPushButton
+    CHOOSE_WHAT_TO_SYNC_BUTTON = {
+        "name": "bSelectiveSync",
+        "type": "QPushButton",
+        "visible": 1,
+        "window": names.owncloudWizard_OCC_OwncloudWizard,
+    }
+
     CHOOSE_WHAT_TO_SYNC_CHECKBOX = names.choose_What_To_Synchronize_QTreeWidget
-    CHOOSE_WHAT_TO_SYNC_OK_BUTTON = names.choose_What_To_Sync_OK_QPushButton
-    MANUAL_SYNC_FOLDER = names.owncloudWizard_rManualFolder_QRadioButton
+    CHOOSE_WHAT_TO_SYNC_OK_BUTTON = {
+        "text": "OK",
+        "type": "QPushButton",
+        "unnamed": 1,
+        "visible": 1,
+        "window": names.choose_What_to_Sync_OCC_SelectiveSyncDialog,
+    }
+    MANUAL_SYNC_FOLDER_OPTION = {
+        "name": "rManualFolder",
+        "type": "QRadioButton",
+        "visible": 1,
+        "window": names.owncloudWizard_OCC_OwncloudWizard,
+    }
 
     def __init__(self):
         pass
@@ -42,15 +59,16 @@ class AccountConnectionWizard:
     def sanitizeFolderPath(self, folderPath):
         return folderPath.rstrip("/")
 
-    def addServer(self, serverAddress):
+    def addServer(self, context):
+        clientDetails = getClientDetails(context)
         squish.mouseClick(squish.waitForObject(self.SERVER_ADDRESS_BOX))
-        squish.type(squish.waitForObject(self.SERVER_ADDRESS_BOX), serverAddress)
+        squish.type(
+            squish.waitForObject(self.SERVER_ADDRESS_BOX), clientDetails['server']
+        )
         squish.clickButton(squish.waitForObject(self.NEXT_BUTTON))
 
-    def addAccount(self, context):
+    def addUserCreds(self, context):
         clientDetails = getClientDetails(context)
-        self.addServer(clientDetails['server'])
-        squish.mouseClick(squish.waitForObject(self.SERVER_ADDRESS_BOX))
         squish.type(squish.waitForObject(self.USERNAME_BOX), clientDetails['user'])
         squish.type(squish.waitForObject(self.USERNAME_BOX), "<Tab>")
         squish.type(squish.waitForObject(self.PASSWORD_BOX), clientDetails['password'])
@@ -77,8 +95,36 @@ class AccountConnectionWizard:
     def connectAccount(self):
         squish.clickButton(squish.waitForObject(self.FINISH_BUTTON))
 
+    def addAccount(self, context):
+        self.addServer(context)
+        self.addUserCreds(context)
+        self.selectSyncFolder(context)
+        self.connectAccount()
+
     def openSyncDialog(self):
         squish.clickButton(squish.waitForObject(self.CHOOSE_WHAT_TO_SYNC_BUTTON))
 
     def selectManualSyncFolder(self):
-        squish.clickButton(squish.waitForObject(self.MANUAL_SYNC_FOLDER))
+        squish.clickButton(squish.waitForObject(self.MANUAL_SYNC_FOLDER_OPTION))
+
+    def selectFoldersToSync(self, context):
+        self.openSyncDialog()
+
+        squish.mouseClick(
+            squish.waitForObjectItem(self.CHOOSE_WHAT_TO_SYNC_CHECKBOX, "/"),
+            11,
+            11,
+            squish.Qt.NoModifier,
+            squish.Qt.LeftButton,
+        )
+        for row in context.table[1:]:
+            squish.mouseClick(
+                squish.waitForObjectItem(
+                    self.CHOOSE_WHAT_TO_SYNC_CHECKBOX, "/." + row[0]
+                ),
+                11,
+                11,
+                squish.Qt.NoModifier,
+                squish.Qt.LeftButton,
+            )
+        squish.clickButton(squish.waitForObject(self.CHOOSE_WHAT_TO_SYNC_OK_BUTTON))

@@ -64,29 +64,20 @@ def hook(context):
         pass
 
 
-def addAccount(context):
+@Given(r'the user has added (the first|another) account with', regexp=True)
+def step(context, accountType):
     newAccount = AccountConnectionWizard()
+    if accountType == 'another':
+        toolbar = Toolbar()
+        toolbar.clickAddAccount()
+
     newAccount.addAccount(context)
-    newAccount.selectSyncFolder(context)
 
 
-@Given('the user has added an account with')
-def step(context):
-    toolbar = Toolbar()
-    toolbar.clickAddAccount()
-
-    addAccount(context)
-
-
-@When('the user adds the first account with')
-def step(context):
-    addAccount(context)
-
-
-@When('the user adds the account with wrong credentials')
+@When('the user adds the following wrong user credentials:')
 def step(context):
     newAccount = AccountConnectionWizard()
-    newAccount.addAccount(context)
+    newAccount.addUserCreds(context)
 
 
 @Then('an account should be displayed with the displayname |any| and host |any|')
@@ -131,23 +122,22 @@ def step(context):
     startClient(context)
 
 
-@When('the user adds an account with')
-def step(context):
-    toolbar = Toolbar()
-    toolbar.clickAddAccount()
-
-    addAccount(context)
-
-
-@When('the user adds an account with the following secure server address')
-def step(context):
-    for row in context.table[0:]:
-        row[1] = substituteInLineCodes(context, row[1])
-        if row[0] == 'server':
-            server = row[1]
-
+@When(r'the user adds (the first|another) account with', regexp=True)
+def step(context, accountType):
     newAccount = AccountConnectionWizard()
-    newAccount.addServer(server)
+    if accountType == 'another':
+        toolbar = Toolbar()
+        toolbar.clickAddAccount()
+
+    newAccount.addAccount(context)
+
+
+@Given('the user has added the following account information:')
+def step(context):
+    newAccount = AccountConnectionWizard()
+    newAccount.addServer(context)
+    newAccount.addUserCreds(context)
+    newAccount.selectSyncFolder(context)
 
 
 def isItemSynced(type, itemName):
@@ -371,11 +361,6 @@ def step(context, file):
 
 @Then('the file "|any|" should not exist on the file system')
 def step(context, file):
-    print('here...')
-    snooze(2)
-    for f in listdir(context.userData['clientSyncPathUser1']):
-        print(f)
-    print('end...')
     filePath = join(context.userData['clientSyncPathUser1'], file)
     fileExists = doFileExist(filePath)
 
@@ -919,32 +904,38 @@ def step(context, itemType, resource):
 def step(context):
     newAccount = AccountConnectionWizard()
     newAccount.addServer(context)
-
     test.compare(
         waitForObjectExists(
             names.owncloudWizard_OwncloudHttpCredsPage_OCC_OwncloudHttpCredsPage
         ).visible,
         True,
+        "Assert credentials page is visible",
     )
 
 
-@Given('the user has added the following account credentials:')
+@When('the user adds the following server address:')
 def step(context):
     newAccount = AccountConnectionWizard()
-    newAccount.addUserCredentails(context)
+    newAccount.addServer(context)
 
+
+@Given('the user has added the following user credentials:')
+def step(context):
+    newAccount = AccountConnectionWizard()
+    newAccount.addUserCreds(context)
     test.compare(
         waitForObjectExists(
             names.owncloudWizard_OwncloudAdvancedSetupPage_OCC_OwncloudAdvancedSetupPage
         ).visible,
         True,
+        "Assert setup page is visible",
     )
 
 
 @Given('the user has changed the sync directory')
 def step(context):
     newAccount = AccountConnectionWizard()
-    newAccount.changeSyncDirectory(context)
+    newAccount.selectSyncFolder(context)
 
 
 @Given('the user has opened chose_what_to_sync dialog')
@@ -955,6 +946,7 @@ def step(context):
     test.compare(
         waitForObjectExists(names.choose_What_to_Sync_OCC_SelectiveSyncDialog).visible,
         True,
+        "Assert selective sync dialog is visible",
     )
 
 
@@ -982,11 +974,22 @@ def step(context):
     newAccount.connectAccount()
 
 
+@When("the user sorts the folder list by name")
+def step(context):
+    mouseClick(waitForObject(names.name_HeaderViewItem))
+
+
+@When("the user sorts the folder list by size")
+def step(context):
+    mouseClick(waitForObject(names.size_HeaderViewItem))
+
+
 @Then('the dialog chose_what_to_sync should be visible')
 def step(context):
     test.compare(
         waitForObjectExists(names.choose_What_to_Sync_OCC_SelectiveSyncDialog).visible,
         True,
+        "Assert selective sync dialog is visible",
     )
 
 
@@ -997,6 +1000,7 @@ def step(context):
             names.deselect_remote_folders_you_do_not_wish_to_synchronize_QModelIndex
         ).checkState,
         "checked",
+        "Assert sync all checkbox is checked",
     )
 
 
@@ -1009,16 +1013,8 @@ def step(context):
             "container": names.deselect_remote_folders_you_do_not_wish_to_synchronize_QModelIndex,
             "type": "QModelIndex",
         }
-        test.compare(waitForObjectExists(FOLDER_TREE_ROW).displayText, row[0])
+        expectedFolder = row[0]
+        actualFolder = waitForObjectExists(FOLDER_TREE_ROW).displayText
+        test.compare(actualFolder, expectedFolder)
 
         rowIndex += 1
-
-
-@When("the user sorts the folder list by name")
-def step(context):
-    mouseClick(waitForObject(names.name_HeaderViewItem))
-
-
-@When("the user sorts the folder list by size")
-def step(context):
-    mouseClick(waitForObject(names.size_HeaderViewItem))
