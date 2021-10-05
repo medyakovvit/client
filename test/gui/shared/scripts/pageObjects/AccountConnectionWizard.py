@@ -31,26 +31,38 @@ class AccountConnectionWizard:
         "visible": 1,
         "window": names.owncloudWizard_OCC_OwncloudWizard,
     }
+    CREDENTIAL_PAGE = (
+        names.owncloudWizard_OwncloudHttpCredsPage_OCC_OwncloudHttpCredsPage
+    )
+    ADVANCE_SETUP_PAGE = (
+        names.owncloudWizard_OwncloudAdvancedSetupPage_OCC_OwncloudAdvancedSetupPage
+    )
+    MANUAL_SYNC_FOLDER_OPTION = {
+        "name": "rManualFolder",
+        "type": "QRadioButton",
+        "visible": 1,
+        "window": names.owncloudWizard_OCC_OwncloudWizard,
+    }
     CHOOSE_WHAT_TO_SYNC_BUTTON = {
         "name": "bSelectiveSync",
         "type": "QPushButton",
         "visible": 1,
         "window": names.owncloudWizard_OCC_OwncloudWizard,
     }
-
-    CHOOSE_WHAT_TO_SYNC_CHECKBOX = names.choose_What_To_Synchronize_QTreeWidget
-    CHOOSE_WHAT_TO_SYNC_OK_BUTTON = {
+    SELECTIVE_SYNC_DIALOG = names.choose_What_to_Sync_OCC_SelectiveSyncDialog
+    SYNC_DIALOG_FOLDER_TREE = names.choose_What_To_Synchronize_QTreeWidget
+    SYNC_DIALOG_ROOT_FOLDER = {
+        "column": 0,
+        "container": SYNC_DIALOG_FOLDER_TREE,
+        "text": "/",
+        "type": "QModelIndex",
+    }
+    SYNC_DIALOG_OK_BUTTON = {
         "text": "OK",
         "type": "QPushButton",
         "unnamed": 1,
         "visible": 1,
-        "window": names.choose_What_to_Sync_OCC_SelectiveSyncDialog,
-    }
-    MANUAL_SYNC_FOLDER_OPTION = {
-        "name": "rManualFolder",
-        "type": "QRadioButton",
-        "visible": 1,
-        "window": names.owncloudWizard_OCC_OwncloudWizard,
+        "window": SELECTIVE_SYNC_DIALOG,
     }
 
     def __init__(self):
@@ -110,8 +122,9 @@ class AccountConnectionWizard:
     def selectFoldersToSync(self, context):
         self.openSyncDialog()
 
+        # first deselect all
         squish.mouseClick(
-            squish.waitForObjectItem(self.CHOOSE_WHAT_TO_SYNC_CHECKBOX, "/"),
+            squish.waitForObject(self.SYNC_DIALOG_ROOT_FOLDER),
             11,
             11,
             squish.Qt.NoModifier,
@@ -119,12 +132,22 @@ class AccountConnectionWizard:
         )
         for row in context.table[1:]:
             squish.mouseClick(
-                squish.waitForObjectItem(
-                    self.CHOOSE_WHAT_TO_SYNC_CHECKBOX, "/." + row[0]
-                ),
+                squish.waitForObjectItem(self.SYNC_DIALOG_FOLDER_TREE, "/." + row[0]),
                 11,
                 11,
                 squish.Qt.NoModifier,
                 squish.Qt.LeftButton,
             )
-        squish.clickButton(squish.waitForObject(self.CHOOSE_WHAT_TO_SYNC_OK_BUTTON))
+        squish.clickButton(squish.waitForObject(self.SYNC_DIALOG_OK_BUTTON))
+
+    def sortBy(self, headerText):
+        squish.mouseClick(
+            squish.waitForObject(
+                {
+                    "container": names.deselect_remote_folders_you_do_not_wish_to_synchronize_QHeaderView,
+                    "text": headerText,
+                    "type": "HeaderViewItem",
+                    "visible": True,
+                }
+            )
+        )

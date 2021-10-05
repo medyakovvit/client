@@ -181,14 +181,14 @@ def waitForFolderToBeSynced(context, folderName):
     )
 
 
-def doFolderExist(folderPath, timeout=1000):
+def folderExists(folderPath, timeout=1000):
     return waitFor(
         lambda: isdir(sanitizePath(folderPath)),
         timeout,
     )
 
 
-def doFileExist(filePath, timeout=1000):
+def fileExists(filePath, timeout=1000):
     return waitFor(
         lambda: isfile(sanitizePath(filePath)),
         timeout,
@@ -351,38 +351,44 @@ def step(context, filePath):
     )
 
 
-@Then('the file "|any|" should exist on the file system')
-def step(context, file):
-    filePath = join(context.userData['clientSyncPathUser1'], file)
-    fileExists = doFileExist(filePath, context.userData['clientSyncTimeout'] * 1000)
+@Then(r'^the (file|folder) "([^"]*)" should exist on the file system$', regexp=True)
+def step(context, resourceType, resource):
+    resourcePath = join(context.userData['clientSyncPathUser1'], resource)
+    resourceExists = False
+    if resourceType == 'file':
+        resourceExists = fileExists(
+            resourcePath, context.userData['clientSyncTimeout'] * 1000
+        )
+    elif resourceType == 'folder':
+        resourceExists = folderExists(
+            resourcePath, context.userData['clientSyncTimeout'] * 1000
+        )
+    else:
+        raise Exception("Unsupported resource type '" + resourceType + "'")
 
-    test.compare(True, fileExists)
-
-
-@Then('the file "|any|" should not exist on the file system')
-def step(context, file):
-    filePath = join(context.userData['clientSyncPathUser1'], file)
-    fileExists = doFileExist(filePath)
-
-    test.compare(False, fileExists)
-
-
-@Then('the folder "|any|" should exist on the file system')
-def step(context, folder):
-    folderPath = join(context.userData['clientSyncPathUser1'], folder)
-    folderExists = doFolderExist(
-        folderPath, context.userData['clientSyncTimeout'] * 1000
+    test.compare(
+        True,
+        resourceExists,
+        "Assert " + resourceType + " '" + resource + "' exists on the system",
     )
 
-    test.compare(True, folderExists)
 
+@Then(r'^the (file|folder) "([^"]*)" should not exist on the file system$', regexp=True)
+def step(context, resourceType, resource):
+    resourcePath = join(context.userData['clientSyncPathUser1'], resource)
+    resourceExists = False
+    if resourceType == 'file':
+        resourceExists = fileExists(resourcePath, 1000)
+    elif resourceType == 'folder':
+        resourceExists = folderExists(resourcePath, 1000)
+    else:
+        raise Exception("Unsupported resource type '" + resourceType + "'")
 
-@Then('the folder "|any|" should not exist on the file system')
-def step(context, folder):
-    folderPath = join(context.userData['clientSyncPathUser1'], folder)
-    folderExists = doFolderExist(folderPath)
-
-    test.compare(False, folderExists)
+    test.compare(
+        False,
+        resourceExists,
+        "Assert " + resourceType + " '" + resource + "' doesn't exist on the system",
+    )
 
 
 @Given('the user has paused the file sync')
@@ -905,9 +911,7 @@ def step(context):
     newAccount = AccountConnectionWizard()
     newAccount.addServer(context)
     test.compare(
-        waitForObjectExists(
-            names.owncloudWizard_OwncloudHttpCredsPage_OCC_OwncloudHttpCredsPage
-        ).visible,
+        waitForObjectExists(newAccount.CREDENTIAL_PAGE).visible,
         True,
         "Assert credentials page is visible",
     )
@@ -924,9 +928,7 @@ def step(context):
     newAccount = AccountConnectionWizard()
     newAccount.addUserCreds(context)
     test.compare(
-        waitForObjectExists(
-            names.owncloudWizard_OwncloudAdvancedSetupPage_OCC_OwncloudAdvancedSetupPage
-        ).visible,
+        waitForObjectExists(newAccount.ADVANCE_SETUP_PAGE).visible,
         True,
         "Assert setup page is visible",
     )
@@ -942,9 +944,8 @@ def step(context):
 def step(context):
     newAccount = AccountConnectionWizard()
     newAccount.openSyncDialog()
-
     test.compare(
-        waitForObjectExists(names.choose_What_to_Sync_OCC_SelectiveSyncDialog).visible,
+        waitForObjectExists(newAccount.SELECTIVE_SYNC_DIALOG).visible,
         True,
         "Assert selective sync dialog is visible",
     )
@@ -974,20 +975,21 @@ def step(context):
     newAccount.connectAccount()
 
 
-@When("the user sorts the folder list by name")
-def step(context):
-    mouseClick(waitForObject(names.name_HeaderViewItem))
-
-
-@When("the user sorts the folder list by size")
-def step(context):
-    mouseClick(waitForObject(names.size_HeaderViewItem))
+@When('the user sorts the folder list by "|any|"')
+def step(context, headerText):
+    headerText = headerText.capitalize()
+    if headerText in ["Size", "Name"]:
+        newAccount = AccountConnectionWizard()
+        newAccount.sortBy(headerText)
+    else:
+        raise Exception("Sorting by '" + headerText + "' is not supported.")
 
 
 @Then('the dialog chose_what_to_sync should be visible')
 def step(context):
+    newAccount = AccountConnectionWizard()
     test.compare(
-        waitForObjectExists(names.choose_What_to_Sync_OCC_SelectiveSyncDialog).visible,
+        waitForObjectExists(newAccount.SELECTIVE_SYNC_DIALOG).visible,
         True,
         "Assert selective sync dialog is visible",
     )
@@ -995,10 +997,9 @@ def step(context):
 
 @Then('the sync all checkbox should be checked')
 def step(context):
+    newAccount = AccountConnectionWizard()
     test.compare(
-        waitForObjectExists(
-            names.deselect_remote_folders_you_do_not_wish_to_synchronize_QModelIndex
-        ).checkState,
+        waitForObjectExists(newAccount.SYNC_DIALOG_ROOT_FOLDER).checkState,
         "checked",
         "Assert sync all checkbox is checked",
     )
@@ -1006,11 +1007,12 @@ def step(context):
 
 @Then("the folders should be in the following order:")
 def step(context):
+    newAccount = AccountConnectionWizard()
     rowIndex = 0
     for row in context.table[1:]:
         FOLDER_TREE_ROW = {
             "row": rowIndex,
-            "container": names.deselect_remote_folders_you_do_not_wish_to_synchronize_QModelIndex,
+            "container": newAccount.SYNC_DIALOG_ROOT_FOLDER,
             "type": "QModelIndex",
         }
         expectedFolder = row[0]

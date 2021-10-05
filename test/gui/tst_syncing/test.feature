@@ -131,21 +131,21 @@ Feature: Syncing files
             | aFolder   |
             | bFolder   |
         # sort folder by name in descending order
-        When the user sorts the folder list by name
+        When the user sorts the folder list by "Name"
         Then the folders should be in the following order:
             | folder    |
             | bFolder   |
             | aFolder   |
             | 123Folder |
         # sort folder by size in ascending order
-        When the user sorts the folder list by size
+        When the user sorts the folder list by "Size"
         Then the folders should be in the following order:
             | folder    |
             | bFolder   |
             | 123Folder |
             | aFolder   |
         # sort folder by size in descending order
-        When the user sorts the folder list by size
+        When the user sorts the folder list by "Size"
         Then the folders should be in the following order:
             | folder    |
             | aFolder   |
