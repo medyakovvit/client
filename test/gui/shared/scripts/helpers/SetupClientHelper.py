@@ -1,5 +1,7 @@
 from urllib.parse import urlparse
 import squish
+from os import makedirs
+from os.path import exists, join
 
 
 confdir = '/tmp/bdd-tests-owncloud-client/'
@@ -11,12 +13,7 @@ def substituteInLineCodes(context, value):
     value = value.replace(
         '%secure_local_server%', context.userData['secureLocalBackendUrl']
     )
-    value = value.replace(
-        '%client_sync_path_user1%', context.userData['clientSyncPathUser1']
-    )
-    value = value.replace(
-        '%client_sync_path_user2%', context.userData['clientSyncPathUser2']
-    )
+    value = value.replace('%client_sync_path%', context.userData['clientSyncPath'])
     value = value.replace(
         '%local_server_hostname%', urlparse(context.userData['localBackendUrl']).netloc
     )
@@ -25,7 +22,7 @@ def substituteInLineCodes(context, value):
 
 
 def getClientDetails(context):
-    clientDetails = {'server': '', 'user': '', 'password': '', 'localfolder': ''}
+    clientDetails = {'server': '', 'user': '', 'password': ''}
     for row in context.table[0:]:
         row[1] = substituteInLineCodes(context, row[1])
         if row[0] == 'server':
@@ -34,13 +31,14 @@ def getClientDetails(context):
             clientDetails.update({'user': row[1]})
         elif row[0] == 'password':
             clientDetails.update({'password': row[1]})
-        elif row[0] == 'localfolder':
-            clientDetails.update({'localfolder': row[1]})
-        try:
-            os.makedirs(localfolder, 0o0755)
-        except:
-            pass
     return clientDetails
+
+
+def createUserSyncPath(context, username):
+    userSyncPath = join(context.userData['clientSyncPath'], username)
+    if not exists(userSyncPath):
+        makedirs(userSyncPath)
+    return userSyncPath
 
 
 def startClient(context):
@@ -85,11 +83,15 @@ def setUpClient(context, username, displayName, confFilePath):
     '''
     userFirstName = username.split()
     userSetting = userSetting + getPollingInterval()
+
+    # create sync folder for user
+    syncPath = createUserSyncPath(context, userFirstName[0])
+
     args = {
         'displayUserName': displayName,
         'davUserName': userFirstName[0].lower(),
         'displayUserFirstName': userFirstName[0],
-        'client_sync_path': context.userData['clientSyncPathUser1'],
+        'client_sync_path': syncPath,
         'local_server': context.userData['localBackendUrl'],
     }
     userSetting = userSetting.format(**args)

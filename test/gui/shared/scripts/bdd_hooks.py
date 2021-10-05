@@ -31,8 +31,7 @@ def hook(context):
         'clientSyncTimeout': 'CLIENT_SYNC_TIMEOUT',
         'middlewareUrl': 'MIDDLEWARE_URL',
         'clientConfigFile': 'CLIENT_LOG_FILE',
-        'clientSyncPathUser1': 'CLIENT_SYNC_PATH_USER1',
-        'clientSyncPathUser2': 'CLIENT_SYNC_PATH_USER2',
+        'clientSyncPath': 'CLIENT_SYNC_PATH',
     }
 
     DEFAULT_CONFIG = {
@@ -41,8 +40,7 @@ def hook(context):
         'clientSyncTimeout': 60,
         'middlewareUrl': 'http://localhost:3000/',
         'clientConfigFile': '-',
-        'clientSyncPathUser1': '/tmp/client-bdd-user1/',
-        'clientSyncPathUser2': '/tmp/client-bdd-user2/',
+        'clientSyncPath': '/tmp/client-bdd/',
     }
 
     # read configs from environment variables
@@ -57,8 +55,8 @@ def hook(context):
         for key, value in context.userData.items():
             if value == '':
                 context.userData[key] = cfg.get('DEFAULT', CONFIG_ENV_MAP[key])
-    except:
-        print("Error reading config.ini file!")
+    except Exception as err:
+        print(err)
 
     # Set the default values if empty
     for key, value in context.userData.items():
@@ -66,15 +64,12 @@ def hook(context):
             context.userData[key] = DEFAULT_CONFIG[key]
         elif key == 'clientSyncTimeout':
             context.userData[key] = builtins.int(value)
-        elif key == 'clientSyncPathUser1' or key == 'clientSyncPathUser2':
+        elif key == 'clientSyncPath':
             # make sure there is always one trailing slash
             context.userData[key] = value.rstrip('/') + '/'
 
-    if not os.path.exists(context.userData['clientSyncPathUser1']):
-        os.makedirs(context.userData['clientSyncPathUser1'])
-
-    if not os.path.exists(context.userData['clientSyncPathUser2']):
-        os.makedirs(context.userData['clientSyncPathUser2'])
+    if not os.path.exists(context.userData['clientSyncPath']):
+        os.makedirs(context.userData['clientSyncPath'])
 
     req = urllib.request.Request(
         os.path.join(context.userData['middlewareUrl'], 'init'),
@@ -97,20 +92,9 @@ def hook(context):
         snooze(5)  # ToDo wait smarter till the app died
 
     # delete local files/folders
-    for filename in os.listdir(context.userData['clientSyncPathUser1']):
-        test.log("Deleting :" + filename)
-        file_path = os.path.join(context.userData['clientSyncPathUser1'], filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
-
-    for filename in os.listdir(context.userData['clientSyncPathUser2']):
-        test.log("Deleting :" + filename)
-        file_path = os.path.join(context.userData['clientSyncPathUser2'], filename)
+    for filename in os.listdir(context.userData['clientSyncPath']):
+        test.log("Deleting: " + filename)
+        file_path = os.path.join(context.userData['clientSyncPath'], filename)
         try:
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.unlink(file_path)
