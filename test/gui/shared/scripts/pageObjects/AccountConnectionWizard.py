@@ -53,9 +53,9 @@ class AccountConnectionWizard:
         squish.type(squish.waitForObject(self.USERNAME_BOX), "<Tab>")
         squish.type(squish.waitForObject(self.PASSWORD_BOX), clientDetails['password'])
         squish.clickButton(squish.waitForObject(self.NEXT_BUTTON))
-        self.selectSyncFolder(syncPath)
 
-    def selectSyncFolder(self, syncPath):
+    def selectSyncFolder(self, context):
+        syncPath = context.userData['currentUserSyncPath']
         try:
             squish.clickButton(squish.waitForObject(self.ERROR_OK_BUTTON, 1000))
         except LookupError:

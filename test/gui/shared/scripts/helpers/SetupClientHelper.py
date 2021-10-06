@@ -38,7 +38,22 @@ def createUserSyncPath(context, username):
     userSyncPath = join(context.userData['clientSyncPath'], username)
     if not exists(userSyncPath):
         makedirs(userSyncPath)
+
+    setCurrentUserSyncPath(context, username)
     return userSyncPath
+
+
+def setCurrentUserSyncPath(context, user):
+    syncPath = join(context.userData['clientSyncPath'], user, '')
+    context.userData['currentUserSyncPath'] = syncPath
+
+
+def getResourcePath(context, resource, user=None):
+    resource == resource.strip('/')
+    if not user == None:
+        return join(context.userData['clientSyncPath'], user, resource)
+    else:
+        return join(context.userData['currentUserSyncPath'], resource)
 
 
 def startClient(context):
