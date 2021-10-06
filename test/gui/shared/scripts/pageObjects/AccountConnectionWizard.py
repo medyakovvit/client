@@ -1,6 +1,6 @@
 import names
 import squish
-from helpers.SetupClientHelper import getClientDetails
+from helpers.SetupClientHelper import getClientDetails, createUserSyncPath
 import test
 
 
@@ -45,28 +45,27 @@ class AccountConnectionWizard:
 
     def addAccount(self, context):
         clientDetails = getClientDetails(context)
+        syncPath = createUserSyncPath(context, clientDetails['user'])
+
         self.addServer(clientDetails['server'])
         squish.mouseClick(squish.waitForObject(self.SERVER_ADDRESS_BOX))
         squish.type(squish.waitForObject(self.USERNAME_BOX), clientDetails['user'])
         squish.type(squish.waitForObject(self.USERNAME_BOX), "<Tab>")
         squish.type(squish.waitForObject(self.PASSWORD_BOX), clientDetails['password'])
         squish.clickButton(squish.waitForObject(self.NEXT_BUTTON))
+        self.selectSyncFolder(syncPath)
 
-    def selectSyncFolder(self, context):
-        clientDetails = getClientDetails(context)
-
+    def selectSyncFolder(self, syncPath):
         try:
-            squish.clickButton(squish.waitForObject(self.ERROR_OK_BUTTON))
+            squish.clickButton(squish.waitForObject(self.ERROR_OK_BUTTON, 1000))
         except LookupError:
             pass
         squish.clickButton(squish.waitForObject(self.SELECT_LOCAL_FOLDER))
         squish.mouseClick(squish.waitForObject(self.DIRECTORY_NAME_BOX))
-        squish.type(
-            squish.waitForObject(self.DIRECTORY_NAME_BOX), clientDetails['localfolder']
-        )
+        squish.type(squish.waitForObject(self.DIRECTORY_NAME_BOX), syncPath)
         squish.clickButton(squish.waitForObject(self.CHOOSE_BUTTON))
         test.compare(
             str(squish.waitForObjectExists(self.SELECT_LOCAL_FOLDER).text),
-            self.sanitizeFolderPath(clientDetails['localfolder']),
+            self.sanitizeFolderPath(syncPath),
         )
         squish.clickButton(squish.waitForObject(self.FINISH_BUTTON))

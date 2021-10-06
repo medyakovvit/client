@@ -67,7 +67,6 @@ def hook(context):
 def addAccount(context):
     newAccount = AccountConnectionWizard()
     newAccount.addAccount(context)
-    newAccount.selectSyncFolder(context)
 
 
 @Given('the user has added an account with')
