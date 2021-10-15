@@ -19,7 +19,7 @@ jobs:
           ref: 2.9
 
       - name: l10n-read
-        run: bash .github/workflows/run-in-docker.sh rabits/qt:5.12-desktop "cd translations && make l10n-read"
+        run: bash .github/workflows/run-in-docker.sh rabits/qt:5.15-desktop "cd translations && make l10n-read"
 
       - name: l10n-push
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
