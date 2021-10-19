@@ -135,7 +135,7 @@ Feature: Syncing files
             """
             test content
             """
-        And as "Alice" the file "Folder1/really long folder name with some spaces and special char such as $%ñ&/test.txt" on the server should have the content "test content"
+        #And as "Alice" the file "Folder1/really long folder name with some spaces and special char such as $%ñ&/test.txt" on the server should have the content "test content"
 
 
     Scenario: Verify pre existing folders in local (Desktop client) are copied over to the server
