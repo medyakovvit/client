@@ -160,5 +160,4 @@ Feature: Syncing files
         Then as "Alice" folder "Folder1" should exist on the server
         When the user clicks on the activity tab
         And the user selects "Not Synced" tab in the activity
-        # Then a conflict warning should be shown for 1 files
-        Then the table of conflict warnings should include file "Folder1/a\\a.txt"
+        #Then the table of conflict warnings should include file "Folder1/a\\a.txt"
