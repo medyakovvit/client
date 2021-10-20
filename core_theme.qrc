@@ -27,5 +27,6 @@
         <file alias="theme/white/state-offline.svg">theme/white/ui-dark-plain-monochrom-state-offline.svg</file>
         <file alias="theme/white/state-pause.svg">theme/white/ui-dark-plain-monochrom-state-pause.svg</file>
         <file alias="theme/white/state-sync.svg">theme/white/ui-dark-plain-monochrom-state-sync.svg</file>
+        <file alias="theme/config_with_defaults.json">config_with_defaults.json</file>
     </qresource>
 </RCC>
