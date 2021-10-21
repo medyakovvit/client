@@ -16,6 +16,17 @@ Feature: Sharing
         When the user adds "Brian Murphy" as collaborator of resource "%client_sync_path_user1%/textfile0.txt" with permissions "edit,share" using the client-UI
         Then user "Brian Murphy" should be listed in the collaborators list for file "%client_sync_path_user1%/textfile0.txt" with permissions "edit,share" on the client-UI
 
+
+    Scenario: Share files/folders with special characters in their name
+        Given user "Brian" has been created on the server with default attributes and without skeleton files
+        And user "Alice" has created folder "SampleFolder,With,$pecial?Characters" on the server
+        And user "Alice" has uploaded file with content "ownCloud test text file 0" to "/$ample1?.txt" on the server
+        And user "Alice" has set up a client with default settings
+        When the user adds "Brian Murphy" as collaborator of resource "%client_sync_path_user1%/SampleFolder,With,$pecial?Characters" with permissions "edit,share" using the client-UI
+        And the user adds "Brian Murphy" as collaborator of resource "%client_sync_path_user1%/$ample1?.txt" with permissions "edit,share" using the client-UI
+        Then user "Brian Murphy" should be listed in the collaborators list for file "%client_sync_path_user1%/SampleFolder,With,$pecial?Characters" with permissions "edit,share" on the client-UI
+        And user "Brian Murphy" should be listed in the collaborators list for file "%client_sync_path_user1%/$ample1?.txt" with permissions "edit,share" on the client-UI
+
     @issue-7459
     Scenario: Progress indicator should not be visible after unselecting the password protection checkbox while sharing through public link
         Given user "Alice" has uploaded file with content "ownCloud test text file 0" to "/textfile0.txt" on the server
@@ -75,6 +86,24 @@ Feature: Sharing
         Then as "Brian" the file "textfile.txt" on the server should have the content "overwrite ownCloud test text file"
         And as "Alice" the file "textfile.txt" on the server should have the content "overwrite ownCloud test text file"
 
+
+    Scenario: unshare a shared file
+        Given user "Brian" has been created on the server with default attributes and without skeleton files
+        And user "Alice" has uploaded file with content "ownCloud test text file 0" to "textfile0.txt" on the server
+        And user "Alice" has shared file "textfile0.txt" on the server with user "Brian" with "all" permissions
+        And user "Alice" has set up a client with default settings
+        When the user unshare the resource "%client_sync_path_user1%/textfile0.txt" for user "Brian Murphy" using the client-UI
+        Then the error text "The item is not shared with any users or groups" should be displayed in the sharing dialog
+
+
+    Scenario: unshare a shared folder
+        Given user "Brian" has been created on the server with default attributes and without skeleton files
+        And user "Alice" has created folder "simple-folder" on the server
+        And user "Alice" has uploaded file with content "ownCloud test text file 0" to "textfile0.txt" on the server
+        And user "Alice" has shared folder "simple-folder" on the server with user "Brian" with "all" permissions
+        And user "Alice" has set up a client with default settings
+        When the user unshare the resource "%client_sync_path_user1%/simple-folder" for user "Brian Murphy" using the client-UI
+        Then the error text "The item is not shared with any users or groups" should be displayed in the sharing dialog
 
     @issue-7423
     Scenario: unshare a reshared file
