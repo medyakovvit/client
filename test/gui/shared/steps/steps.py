@@ -266,7 +266,6 @@ def collaboratorShouldBeListed(context, receiver, resource, permissions):
     socketConnect = syncstate.SocketConnect()
     socketConnect.sendCommand("SHARE:" + resource + "\n")
     permissionsList = permissions.split(',')
-    
     test.compare(
         str(waitForObjectExists(names.scrollArea_sharedWith_QLabel).text), receiver
     )
@@ -861,7 +860,7 @@ def step(context, itemType, resource):
     else:
         raise Exception("No such item type for resource")
 
-    
+
 @When('the user unshare the resource "|any|" for user "|any|" using the client-UI')
 def step(context, resource, receiver):
     openSharingDialog(context, resource)
@@ -869,5 +868,3 @@ def step(context, resource, receiver):
         str(waitForObjectExists(names.scrollArea_sharedWith_QLabel).text), receiver
     )
     clickButton(waitForObject(names.scrollArea_deleteShareButton_QToolButton))
-    
-    
